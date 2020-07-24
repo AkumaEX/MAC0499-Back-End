@@ -1,3 +1,113 @@
-from django.test import TestCase
+from django.test import TestCase, Client
+from django.urls import reverse
+from django.core.files.uploadedfile import SimpleUploadedFile
+from .models import UploadFile
 
-# Create your tests here.
+
+def create_uploaded_file():
+    file = SimpleUploadedFile(name='test.xls', content=b'file_content')
+    data = UploadFile.objects.create(file=file)
+    return data.pk
+
+
+def remove_uploaded_file():
+    query_set = UploadFile.objects.filter(file__startswith='test')
+    for query in query_set:
+        query.file.delete(save=True)
+
+
+class IndexViewTests(TestCase):
+
+    def test_template(self):
+        client = Client()
+        response = client.get(reverse('ml:index'))
+        self.assertTemplateUsed(response, template_name='ml/index.html')
+
+    def test_status_code(self):
+        client = Client()
+        response = client.get(reverse('ml:index'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_start_context(self):
+        client = Client()
+        response = client.get(reverse('ml:index'))
+        self.assertQuerysetEqual(response.context['files'], [])
+
+    def test_start_links(self):
+        client = Client()
+        response = client.get(reverse('ml:index'))
+        self.assertContains(response, reverse('ml:upload'))
+        self.assertNotContains(response, reverse('ml:configure'))
+
+
+class UploadViewTests(TestCase):
+
+    def test_template(self):
+        client = Client()
+        response = client.get(reverse('ml:upload'))
+        self.assertTemplateUsed(response, template_name='ml/upload.html')
+
+    def test_status_code(self):
+        client = Client()
+        response = client.get(reverse('ml:upload'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_post_status_code(self):
+        client = Client()
+        file = SimpleUploadedFile(name='test.xls', content=b'file_content')
+        response = client.post(
+            path=reverse('ml:upload'),
+            data={'name': file.name, 'file': file},
+            format='multipart/form-data',
+            follow=True
+        )
+        self.assertRedirects(
+            response=response,
+            expected_url=reverse('ml:index'),
+            status_code=302,
+            target_status_code=200
+        )
+        remove_uploaded_file()
+
+
+class DeleteViewTests(TestCase):
+
+    def test_post_status_code(self):
+        client = Client()
+        pk = create_uploaded_file()
+        response = client.post(
+            path=reverse('ml:delete'),
+            data={'pk': pk},
+            follow=True
+        )
+        self.assertRedirects(
+            response=response,
+            expected_url=reverse('ml:index'),
+            status_code=302,
+            target_status_code=200
+        )
+        remove_uploaded_file()
+
+
+class ConfigureViewTest(TestCase):
+
+    def test_status_code(self):
+        client = Client()
+        response = client.get(reverse('ml:configure'))
+        self.assertRedirects(
+            response=response,
+            expected_url=reverse('ml:index'),
+            status_code=302,
+            target_status_code=200
+        )
+
+    def test_post_status_code(self):
+        client = Client()
+        pk = create_uploaded_file()
+        response = client.post(
+            path=reverse('ml:configure'),
+            data={'pk': pk},
+            follow=True
+        )
+        self.assertEqual(response.status_code, 200)
+        remove_uploaded_file()

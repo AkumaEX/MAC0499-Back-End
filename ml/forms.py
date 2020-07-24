@@ -9,4 +9,3 @@ class UploadFileForm(forms.ModelForm):
         widgets = {
             'file': forms.FileInput(attrs={'class': 'form-control-file'})
         }
-

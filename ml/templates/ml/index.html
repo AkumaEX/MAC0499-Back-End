@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Aprendizado de Máquina
+{% endblock %}
+
+{% block text %}
+Adicione, remova ou selecione os dados para o treinamento
+{% endblock %}
+
+{% block main %}
+
+<a href="{% url 'ml:upload' %}" class="btn btn-primary shadow rounded">Adicionar arquivo</a>
+
+<p></p>
+{% if files %}
+<form action="{% url 'ml:configure' %}" method="post">
+    <table class="table table-hover">
+        {% csrf_token %}
+        {% for file in files %}
+        <tr>
+            <td>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="{{ file.id }}" name="pk" value="{{ file.id }}">
+                    <label class="form-check-label" for="{{ file.id }}">{{file}}</label>
+                </div>
+            </td>
+            <td>
+                {% include 'ml/delete_modal.html' %}
+            </td>
+        </tr>
+        {% endfor%}
+    </table>
+    <input type="submit" value="Treinar" class="btn btn-primary shadow rounded">
+</form>
+{% endif%}
+
+{% endblock %}

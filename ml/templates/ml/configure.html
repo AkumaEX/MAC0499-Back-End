@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Configuração dos parâmetros
+{% endblock %}
+
+{% block text %}
+Ordene os arquivos do mais antigo ao mais novo
+{% endblock %}
+
+{% block main %}
+
+<form action="{% url 'ml:train'%}" method="post">
+    {% csrf_token %}
+    {% for i in range %}
+    <div class="form-group">
+        <select class="form-control" name="filename" value="{{ file }}">
+            {% for file in files %}
+            <option>{{ file }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    {% endfor %}
+    <input type="submit" value="Enviar" class="btn btn-primary shadow rounded">
+</form>
+{% endblock %}
+

@@ -14,9 +14,9 @@ Ordene os arquivos do mais antigo ao mais novo
     {% csrf_token %}
     {% for i in range %}
     <div class="form-group">
-        <select class="form-control" name="filename" value="{{ file }}">
+        <select class="form-control" name="filepath">
             {% for file in files %}
-            <option>{{ file }}</option>
+            <option value="{{ file.file.path }}">{{ file }}</option>
             {% endfor %}
         </select>
     </div>

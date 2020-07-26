@@ -1,9 +1,10 @@
 # Create your views here.
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from .forms import UploadFileForm
 from .models import UploadFile
+from ml.hotspot_predictor import HotspotPredictor
 
 
 def index(request):
@@ -42,10 +43,10 @@ def configure(request):
 
 def train(request):
     if request.method == 'POST':
-        filenames = request.POST.getlist('filename')
-        if filenames:
-            # TODO: criar a classe para a predição que receba a filenames no construtor
-            print(filenames)
+        filepaths = request.POST.getlist('filepath')
+        if filepaths:
+            predictor = HotspotPredictor(filepaths, 2000)
+            print(predictor.get_hotspot())
         else:
             print('fail')
     return HttpResponseRedirect(reverse('ml:index'))

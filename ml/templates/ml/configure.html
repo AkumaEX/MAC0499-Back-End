@@ -10,18 +10,25 @@ Ordene os arquivos do mais antigo ao mais novo
 
 {% block main %}
 
-<form action="{% url 'ml:train'%}" method="post">
-    {% csrf_token %}
-    {% for i in range %}
-    <div class="form-group">
-        <select class="form-control" name="filepath">
-            {% for file in files %}
-            <option value="{{ file.file.path }}">{{ file }}</option>
+    <form action="{% url 'ml:train'%}" method="post">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col">
+                <label>Ordene os arquivos:</label>
+            {% for i in range %}
+                <div class="form-group">
+                    {{ select_form }}
+                </div>
             {% endfor %}
-        </select>
-    </div>
-    {% endfor %}
-    <input type="submit" value="Enviar" class="btn btn-primary shadow rounded">
-</form>
+            </div>
+            <div class="col">
+                <div class="form-group">
+                    {{ n_clusters_form }}
+                </div>
+            </div>
+        </div>
+        <input type="submit" value="Enviar" class="btn btn-primary shadow rounded">
+    </form>
+</div>
 {% endblock %}
 

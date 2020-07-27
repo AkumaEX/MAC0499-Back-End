@@ -3,6 +3,8 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from .forms import UploadFileForm
+from .forms import SelectFileForm
+from .forms import NumberClusterForm
 from .models import UploadFile
 from ml.hotspot_predictor import HotspotPredictor
 
@@ -36,17 +38,19 @@ def configure(request):
     if request.method == 'POST':
         pks = request.POST.getlist('pk')
         if pks:
-            files = UploadFile.objects.filter(id__in=pks)
-            return render(request, 'ml/configure.html', {'files': files, 'range': range(len(files))})
+            select_form = SelectFileForm(pks)
+            n_clusters_form = NumberClusterForm()
+            context = {'select_form': select_form, 'n_clusters_form': n_clusters_form, 'range': range(len(pks))}
+            return render(request, 'ml/configure.html', context)
     return HttpResponseRedirect(reverse('ml:index'))
 
 
 def train(request):
     if request.method == 'POST':
         filepaths = request.POST.getlist('filepath')
-        if filepaths:
-            predictor = HotspotPredictor(filepaths, 2000)
+        n_clusters_form = NumberClusterForm(request.POST)
+        if filepaths and n_clusters_form.is_valid():
+            n_clusters = n_clusters_form.cleaned_data['n_clusters']
+            predictor = HotspotPredictor(filepaths, n_clusters)
             print(predictor.get_hotspot())
-        else:
-            print('fail')
     return HttpResponseRedirect(reverse('ml:index'))

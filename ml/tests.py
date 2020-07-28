@@ -2,6 +2,8 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 from .models import UploadFile
+from .forms import ChoiceFileForm
+from .forms import UploadFileForm
 
 
 def create_uploaded_file():
@@ -28,16 +30,26 @@ class IndexViewTests(TestCase):
         response = client.get(reverse('ml:index'))
         self.assertEqual(response.status_code, 200)
 
-    def test_start_context(self):
+    def test_form(self):
         client = Client()
         response = client.get(reverse('ml:index'))
-        self.assertQuerysetEqual(response.context['files'], [])
+        self.assertIsInstance(response.context['form'], ChoiceFileForm)
 
     def test_start_links(self):
         client = Client()
         response = client.get(reverse('ml:index'))
         self.assertContains(response, reverse('ml:upload'))
         self.assertNotContains(response, reverse('ml:configure'))
+        self.assertNotContains(response, reverse('ml:delete'))
+
+    def test_links(self):
+        client = Client()
+        create_uploaded_file()
+        response = client.get(reverse('ml:index'))
+        self.assertContains(response, reverse('ml:upload'))
+        self.assertContains(response, reverse('ml:configure'))
+        self.assertContains(response, reverse('ml:delete'))
+        remove_uploaded_file()
 
 
 class UploadViewTests(TestCase):
@@ -52,7 +64,7 @@ class UploadViewTests(TestCase):
         response = client.get(reverse('ml:upload'))
         self.assertEqual(response.status_code, 200)
 
-    def test_post_status_code(self):
+    def test_post_redirection(self):
         client = Client()
         file = SimpleUploadedFile(name='test.xls', content=b'file_content')
         response = client.post(
@@ -69,10 +81,39 @@ class UploadViewTests(TestCase):
         )
         remove_uploaded_file()
 
+    def test_form(self):
+        client = Client()
+        response = client.get(reverse('ml:upload'))
+        self.assertIsInstance(response.context['form'], UploadFileForm)
+
+
+class ConfigureViewTest(TestCase):
+
+    def test_status_code(self):
+        client = Client()
+        response = client.get(reverse('ml:configure'))
+        self.assertRedirects(
+            response=response,
+            expected_url=reverse('ml:index'),
+            status_code=302,
+            target_status_code=200
+        )
+
+    def test_redirection(self):
+        client = Client()
+        pk = create_uploaded_file()
+        response = client.post(
+            path=reverse('ml:configure'),
+            data={'pk': pk},
+            follow=True
+        )
+        self.assertEqual(response.status_code, 200)
+        remove_uploaded_file()
+
 
 class DeleteViewTests(TestCase):
 
-    def test_post_status_code(self):
+    def test_redirection(self):
         client = Client()
         pk = create_uploaded_file()
         response = client.post(
@@ -89,25 +130,3 @@ class DeleteViewTests(TestCase):
         remove_uploaded_file()
 
 
-class ConfigureViewTest(TestCase):
-
-    def test_status_code(self):
-        client = Client()
-        response = client.get(reverse('ml:configure'))
-        self.assertRedirects(
-            response=response,
-            expected_url=reverse('ml:index'),
-            status_code=302,
-            target_status_code=200
-        )
-
-    def test_post_status_code(self):
-        client = Client()
-        pk = create_uploaded_file()
-        response = client.post(
-            path=reverse('ml:configure'),
-            data={'pk': pk},
-            follow=True
-        )
-        self.assertEqual(response.status_code, 200)
-        remove_uploaded_file()

@@ -2,6 +2,7 @@
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from .forms import ChoiceFileForm
 from .forms import UploadFileForm
 from .forms import SelectFileForm
 from .forms import NumberClusterForm
@@ -10,8 +11,8 @@ from ml.hotspot_predictor import HotspotPredictor
 
 
 def index(request):
-    files = UploadFile.objects.all()
-    return render(request, 'ml/index.html', {'files': files})
+    form = ChoiceFileForm()
+    return render(request, 'ml/index.html', {'form': form})
 
 
 def upload(request):
@@ -25,15 +26,6 @@ def upload(request):
     return render(request, 'ml/upload.html', {'form': form})
 
 
-def delete(request):
-    if request.method == 'POST':
-        pk = request.POST.get('pk')
-        file = get_object_or_404(UploadFile, pk=pk)
-        file.file.delete(save=True)
-        file.delete()
-    return HttpResponseRedirect(reverse('ml:index'))
-
-
 def configure(request):
     if request.method == 'POST':
         pks = request.POST.getlist('pk')
@@ -45,6 +37,18 @@ def configure(request):
     return HttpResponseRedirect(reverse('ml:index'))
 
 
+def delete(request):
+    print(request.POST)
+    if request.method == 'POST':
+        pks = request.POST.getlist('pk')
+        if pks:
+            files = UploadFile.objects.filter(id__in=pks)
+            for file in files:
+                file.file.delete(save=True)
+                file.delete()
+    return HttpResponseRedirect(reverse('ml:index'))
+
+
 def train(request):
     if request.method == 'POST':
         filepaths = request.POST.getlist('filepath')
@@ -52,5 +56,5 @@ def train(request):
         if filepaths and n_clusters_form.is_valid():
             n_clusters = n_clusters_form.cleaned_data['n_clusters']
             predictor = HotspotPredictor(filepaths, n_clusters)
-            print(predictor.get_hotspot())
+            # TODO: salvar os hotspots
     return HttpResponseRedirect(reverse('ml:index'))

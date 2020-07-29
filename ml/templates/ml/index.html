@@ -10,24 +10,30 @@ Adicione, remova ou selecione os arquivos para o treinamento
 
 {% block main %}
 
-<a href="{% url 'ml:upload' %}" class="btn btn-primary shadow rounded">Adicionar arquivo</a>
-<p></p>
+<div class="card border-white">
+    <div class="card-body">
 
-{% if form.pk|length %}
-<form method="post">
-    {% csrf_token %}
+        <a href="{% url 'ml:upload' %}" class="btn btn-primary shadow rounded">Adicionar arquivo</a>
+        <p></p>
 
-    <label>Selecione:</label>
-    {% for choice in form.pk %}
-    <div class="form-group form-check">
-        {{ choice }}
+        {% if form.pk|length %}
+        <form method="post">
+            {% csrf_token %}
+
+            <label>Selecione:</label>
+            {% for choice in form.pk %}
+            <div class="form-group form-check">
+                {{ choice }}
+            </div>
+            {% endfor %}
+
+            <input formaction="{% url 'ml:configure' %}" type="submit" value="Treinar"
+                   class="btn btn-primary shadow rounded">
+            <input formaction="{% url 'ml:delete' %}" type="submit" value="Remover"
+                   class="btn btn-danger shadow rounded">
+        </form>
+        {% endif %}
     </div>
-    {% endfor %}
-
-    <input formaction="{% url 'ml:configure' %}" type="submit" value="Treinar" class="btn btn-primary shadow rounded">
-    <input formaction="{% url 'ml:delete' %}" type="submit" value="Remover" class="btn btn-danger shadow rounded">
-
-</form>
-{% endif %}
+</div>
 
 {% endblock %}

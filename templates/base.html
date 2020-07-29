@@ -21,7 +21,16 @@
 <body style="background-color: gainsboro">
 <div class="container shadow bg-white rounded">
     <nav class="navbar">
-        <a class="navbar-brand" href="#">MAC0499</a>
+        <a class="navbar-brand" href="{% url 'index:index' %}">MAC0499</a>
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                {% if user.is_authenticated %}
+                {{ user }} (<a href="{% url 'index:logout_user' %}">Sair</a>)
+                {% else %}
+                <a class="nav-link" href="{% url 'index:login_user' %}">Entrar</a>
+                {% endif %}
+            </li>
+        </ul>
     </nav>
 </div>
 
@@ -33,11 +42,22 @@
         <hr>
         <p>{% block text %}{% endblock %}</p>
     </div>
+
+    {% if error_message %}
+    <div class="alert alert-danger" role="alert">
+        {{ error_message}}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    {% endif %}
+
     {% block main %}
     {% endblock %}
 </div>
 
 <p></p>
+
 <div class="container shadow p-3 bg-white rounded">
     <small>2020 Desenvolvido por Julio Kenji Ueda</small>
 </div>

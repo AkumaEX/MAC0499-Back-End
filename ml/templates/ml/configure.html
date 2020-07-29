@@ -20,25 +20,41 @@ Configuração dos parâmetros
 
 {% block main %}
 
-    <form action="{% url 'ml:train'%}" method="post">
-        {% csrf_token %}
-        <div class="row">
-            <div class="col">
-                <label>Ordene os arquivos:</label>
-            {% for i in range %}
-                <div class="form-group">
-                    {{ select_form }}
+<div class="card border-white">
+    <div class="card-body">
+
+        <form action="{% url 'ml:train'%}" method="post">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col">
+                    <label>Ordene os arquivos:</label>
+                    {% for i in range %}
+                    <div class="form-group">
+                        {{ select_form }}
+                    </div>
+                    {% endfor %}
                 </div>
-            {% endfor %}
-            </div>
-            <div class="col">
-                <div class="form-group">
-                    {{ n_clusters_form }}
+                <div class="col">
+                    <div class="form-group">
+                        {{ n_clusters_form }}
+                    </div>
                 </div>
             </div>
-        </div>
-        <input type="submit" value="Iniciar Treinamento" class="btn btn-primary shadow rounded">
-    </form>
+            <button id="btnFetch" type="submit" class="btn btn-primary shadow rounded">Iniciar Treinamento</button>
+        </form>
+    </div>
 </div>
+
+<script>
+    $(document).ready(function () {
+        $("#btnFetch").click(function () {
+            $(this).prop("disabled", true);
+            $(this).html(
+                `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Treinando ...`
+            );
+        });
+    });
+</script>
+
 {% endblock %}
 

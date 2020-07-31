@@ -43,13 +43,15 @@
         <p>{% block text %}{% endblock %}</p>
     </div>
 
-    {% if error_message %}
-    <div class="alert alert-danger" role="alert">
-        {{ error_message}}
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.extra_tags }}" role="alert">
+        {{ message }}
         <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
             <span aria-hidden="true">&times;</span>
         </button>
     </div>
+    {% endfor %}
     {% endif %}
 
     {% block main %}

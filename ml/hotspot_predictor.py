@@ -9,8 +9,9 @@ from sklearn.linear_model import LinearRegression
 class HotspotPredictor(object):
 
     def __init__(self, filepaths, n_clusters):
+
         def load_dataframe(filepath, month):
-            cols = ['DATAOCORRENCIA', 'LATITUDE', 'LONGITUDE']
+            cols = ['DATAOCORRENCIA', 'HORAOCORRENCIA', 'LATITUDE', 'LONGITUDE']
             df = pd.read_csv(
                 filepath_or_buffer=filepath,
                 encoding='utf-16 le',
@@ -70,9 +71,10 @@ class HotspotPredictor(object):
         self._filepaths = filepaths
         self._n_clusters = n_clusters
         self._kmeans = MiniBatchKMeans(
-            n_clusters=n_clusters, init_size=n_clusters)
+            n_clusters=n_clusters, init_size=n_clusters, random_state=42)
         self._df = get_dataframe()
         self._hotspot = predict_hotspot()
+        self._results = list()
 
     def get_kmeans(self):
         return self._kmeans
@@ -82,3 +84,11 @@ class HotspotPredictor(object):
 
     def get_hotspot(self):
         return self._hotspot
+
+    def get_results(self):
+        for cluster in range(self._n_clusters):
+            df = self._df[self._df['GRUPO'] == cluster]
+            geo = [(row['DATAOCORRENCIA'], row['HORAOCORRENCIA'], row['LATITUDE'], row['LONGITUDE']) for idx, row in
+                   df.iterrows()]
+            self._results.append(dict([('cluster', cluster), ('geo', geo), ('hotspot', str(self._hotspot[cluster]))]))
+        return self._results

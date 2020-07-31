@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, reverse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from .forms import LoginForm
 
 
@@ -20,8 +21,8 @@ def login_user(request):
                 login(request, user)
                 return redirect(reverse('index:index'))
             else:
-                error_message = 'Nome de usuário ou senha inválida. Tente novamente'
-                return render(request, 'index/login.html', {'form': form, 'error_message': error_message})
+                messages.error(request, 'Credenciais inválidas. Verifique e tente novamente', extra_tags='danger')
+                return render(request, 'index/login.html', {'form': form})
     else:
         form = LoginForm()
     return render(request, 'index/login.html', {'form': form})

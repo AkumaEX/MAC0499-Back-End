@@ -141,3 +141,20 @@ class DeleteViewTests(TestCase):
             target_status_code=200
         )
         remove_uploaded_file()
+
+
+class TrainViewTests(TestCase):
+
+    def test_get_redirection(self):
+        client = Client()
+        client.force_login(User.objects.get_or_create(username='test_user')[0])
+        response = client.get(
+            path=reverse('ml:train'),
+            follow=True
+        )
+        self.assertRedirects(
+            response=response,
+            expected_url=reverse('ml:index'),
+            status_code=302,
+            target_status_code=200
+        )

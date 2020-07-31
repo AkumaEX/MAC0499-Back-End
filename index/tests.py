@@ -71,7 +71,7 @@ class LoginViewTests(TestCase):
             data={'username': 'invalid_username', 'password': 'secret'},
             follow=True
         )
-        self.assertIsNotNone(response.context.get('error_message'))
+        self.assertContains(response, 'Credenciais inválidas')
         self.assertEqual(response.status_code, 200)
 
     def test_post_invalid_password(self):
@@ -82,7 +82,7 @@ class LoginViewTests(TestCase):
             data={'username': 'test_user', 'password': 'invalid_password'},
             follow=True
         )
-        self.assertIsNotNone(response.context.get('error_message'))
+        self.assertContains(response, 'Credenciais inválidas')
         self.assertEqual(response.status_code, 200)
 
     def test_post_empty_form(self):

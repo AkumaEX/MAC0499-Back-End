@@ -1,6 +1,8 @@
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
 from django.contrib import messages
 from django.http import HttpResponseRedirect
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
 from .forms import ChoiceFileForm
@@ -10,6 +12,7 @@ from .forms import NumberClusterForm
 from .models import UploadFile
 from .models import ClusterData
 from ml.hotspot_predictor import HotspotPredictor
+from joblib import dump, load
 
 
 @login_required
@@ -64,11 +67,24 @@ def train(request):
         if filepaths and n_clusters_form.is_valid():
             n_clusters = n_clusters_form.cleaned_data['n_clusters']
             predictor = HotspotPredictor(filepaths, n_clusters)
+            kmeans = predictor.get_kmeans()
+            dump(kmeans, settings.MEDIA_ROOT + '/kmeans.joblib')
             clusters_data = predictor.get_results()
             objs = [ClusterData(data=data) for data in clusters_data]
             ClusterData.objects.all().delete()
             ClusterData.objects.bulk_create(objs)
             messages.success(request, 'Treinamento concluído com sucesso', extra_tags='success')
-            # TODO: salvar o modelo kmeans no disco
             return HttpResponseRedirect(reverse('ml:index'))
     return HttpResponseRedirect(reverse('ml:index'))
+
+
+def api(request):
+    latitude = request.GET.get('latitude', None)
+    longitude = request.GET.get('longitude', None)
+    if latitude and longitude:
+        kmeans = load(settings.MEDIA_ROOT + '/kmeans.joblib')
+        cluster = kmeans.predict([[latitude, longitude]])
+        obj = ClusterData.objects.filter(data__cluster=int(cluster[0]))[0]
+        return JsonResponse(obj.data)
+    else:
+        return HttpResponseRedirect(reverse('ml:index'))

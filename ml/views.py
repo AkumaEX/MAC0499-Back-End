@@ -84,7 +84,9 @@ def api(request):
     if latitude and longitude:
         kmeans = load(settings.MEDIA_ROOT + '/kmeans.joblib')
         cluster = kmeans.predict([[latitude, longitude]])
-        obj = ClusterData.objects.filter(data__cluster=int(cluster[0]))[0]
-        return JsonResponse(obj.data)
-    else:
-        return HttpResponseRedirect(reverse('ml:index'))
+        obj = ClusterData.objects.filter(data__cluster=int(cluster[0]))
+        if obj:
+            return JsonResponse(obj[0].data)
+        else:
+            messages.warning(request, 'Objeto não encontrado no Banco de Dados', extra_tags='warning')
+    return HttpResponseRedirect(reverse('ml:index'))

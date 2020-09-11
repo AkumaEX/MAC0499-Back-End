@@ -86,9 +86,9 @@ class HotspotPredictor(object):
         return self._hotspot
 
     def get_results(self):
+        key_values = {'date': 'DATAOCORRENCIA', 'time': 'HORAOCORRENCIA', 'latitude': 'LATITUDE', 'longitude': 'LONGITUDE'}
         for cluster in range(self._n_clusters):
             df = self._df[self._df['GRUPO'] == cluster]
-            geo = [[row['DATAOCORRENCIA'], row['HORAOCORRENCIA'], row['LATITUDE'], row['LONGITUDE']] for idx, row in
-                   df.iterrows()]
-            self._results.append(dict([('cluster', cluster), ('geo', geo), ('hotspot', bool(self._hotspot[cluster]))]))
+            data = [{k: row[v] for k, v in key_values.items()} for idx, row in df.iterrows()]
+            self._results.append(dict([('cluster', cluster), ('data', data), ('hotspot', bool(self._hotspot[cluster]))]))
         return self._results

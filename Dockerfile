@@ -1,4 +1,4 @@
-FROM python:3
+FROM python:latest
 ENV PYTHONUNBUFFERED 1
 USER 1000:1000
 RUN mkdir /code

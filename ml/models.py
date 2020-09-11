@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib.postgres.fields import JSONField
 
 
 class UploadFile(models.Model):
@@ -10,6 +9,4 @@ class UploadFile(models.Model):
 
 
 class ClusterData(models.Model):
-    data = JSONField()
-
-
+    data = models.JSONField()

@@ -23,7 +23,7 @@ Configuração dos parâmetros
 <div class="card border-white">
     <div class="card-body">
 
-        <form action="{% url 'ml:train'%}" method="post">
+        <form action="{% url 'ml:train'%}" method="post" id="train-form">
             {% csrf_token %}
             <div class="row">
                 <div class="col">
@@ -40,18 +40,17 @@ Configuração dos parâmetros
                     </div>
                 </div>
             </div>
-            <button id="btnFetch" type="submit" class="btn btn-primary shadow rounded">Iniciar Treinamento</button>
+            <button id="form-button" type="submit" class="btn btn-primary shadow rounded">Iniciar Treinamento</button>
         </form>
     </div>
 </div>
 
-<script>
+<script type="text/javascript">
     $(document).ready(function () {
-        $("#btnFetch").click(function () {
+        $("#form-button").click(function () {
             $(this).prop("disabled", true);
-            $(this).html(
-                `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Treinando ...`
-            );
+            $(this).html(`<i class="spinner-border spinner-border-sm"></i> Treinando ...`);
+            $("#train-form").submit();
         });
     });
 </script>

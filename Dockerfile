@@ -1,8 +1,3 @@
-FROM python:latest
-ENV PYTHONUNBUFFERED 1
-USER 1000:1000
-RUN mkdir /code
-WORKDIR /code
-COPY requirements.txt /code/
-RUN pip install -r requirements.txt
-COPY . /code/
+FROM python
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt

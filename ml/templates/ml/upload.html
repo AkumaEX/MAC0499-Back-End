@@ -11,14 +11,12 @@ Os arquivos estão disponíveis no <a href="http://www.ssp.sp.gov.br/transparenc
 
 {% block main %}
 
-<div class="card border-white">
-    <div class="card-body">
-        <form action="{% url 'ml:upload'%}" method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <input type="submit" value="Enviar" class="btn btn-primary shadow rounded">
-        </form>
-    </div>
+<div class="container">
+    <form action="{% url 'ml:upload'%}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Enviar" class="btn btn-primary shadow rounded">
+    </form>
 </div>
 
 {% endblock %}

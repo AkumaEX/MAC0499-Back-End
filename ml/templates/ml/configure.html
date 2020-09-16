@@ -20,29 +20,26 @@ Configuração dos parâmetros
 
 {% block main %}
 
-<div class="card border-white">
-    <div class="card-body">
-
-        <form action="{% url 'ml:train'%}" method="post" id="train-form">
-            {% csrf_token %}
-            <div class="row">
-                <div class="col">
-                    <label>Ordene os arquivos:</label>
-                    {% for i in range %}
-                    <div class="form-group">
-                        {{ select_form }}
-                    </div>
-                    {% endfor %}
+<div class="container">
+    <form action="{% url 'ml:train'%}" method="post" id="train-form">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col">
+                <label>Ordene os arquivos:</label>
+                {% for i in range %}
+                <div class="form-group">
+                    {{ select_form }}
                 </div>
-                <div class="col">
-                    <div class="form-group">
-                        {{ n_clusters_form }}
-                    </div>
+                {% endfor %}
+            </div>
+            <div class="col">
+                <div class="form-group">
+                    {{ n_clusters_form }}
                 </div>
             </div>
-            <button id="form-button" type="submit" class="btn btn-primary shadow rounded">Iniciar Treinamento</button>
-        </form>
-    </div>
+        </div>
+        <button id="form-button" type="submit" class="btn btn-primary shadow rounded">Iniciar Treinamento</button>
+    </form>
 </div>
 
 <script type="text/javascript">

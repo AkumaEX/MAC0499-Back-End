@@ -19,8 +19,9 @@
             crossorigin="anonymous"></script>
     <title>eRoubo</title>
 </head>
-<body style="background-color: gainsboro">
-<div class="container shadow bg-white rounded">
+<body style="background-color: whitesmoke">
+
+<div class="container shadow-lg my-3 py-3 px-5 bg-white rounded">
     <nav class="navbar">
         <a class="navbar-brand" href="{% url 'index:index' %}" style="font-family: Righteous; font-size: xx-large">eRoubo</a>
         <ul class="navbar-nav">
@@ -33,12 +34,7 @@
             </li>
         </ul>
     </nav>
-</div>
-
-<p></p>
-
-<div class="container shadow p-3 bg-white rounded">
-    <div class="jumbotron shadow" style="background-color: whitesmoke">
+    <div class="jumbotron shadow" style="background-color: ghostwhite">
         <h3>{% block title %}{% endblock %}</h3>
         <hr>
         <p>{% block text %}{% endblock %}</p>
@@ -57,13 +53,11 @@
 
     {% block main %}
     {% endblock %}
+
+    <hr>
+    <p style="text-align: center"><small>2020 eRoubo desenvolvido por Julio Kenji Ueda</small></p>
 </div>
 
-<p></p>
-
-<div class="container shadow p-3 bg-white rounded">
-    <small>2020 eRoubo desenvolvido por Julio Kenji Ueda</small>
-</div>
 
 </body>
 </html>

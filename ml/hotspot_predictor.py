@@ -86,9 +86,35 @@ class HotspotPredictor(object):
         return self._hotspot
 
     def get_results(self):
-        key_values = {'date': 'DATAOCORRENCIA', 'time': 'HORAOCORRENCIA', 'latitude': 'LATITUDE', 'longitude': 'LONGITUDE'}
         for cluster in range(self._n_clusters):
             df = self._df[self._df['GRUPO'] == cluster]
-            data = [{k: row[v] for k, v in key_values.items()} for idx, row in df.iterrows()]
-            self._results.append(dict([('cluster', cluster), ('data', data), ('hotspot', bool(self._hotspot[cluster]))]))
+            features = [
+                self.get_feature(row['LATITUDE'], row['LONGITUDE'], row['DATAOCORRENCIA'], row['HORAOCORRENCIA'],
+                                 bool(self._hotspot[cluster]), cluster) for idx, row in df.iterrows()]
+            self._results.append(self.get_feature_collection(features, bool(self._hotspot[cluster]), cluster))
         return self._results
+
+    @staticmethod
+    def get_feature(latitude, longitude, date, time, hotspot, cluster):
+        return {
+            'type': 'Feature',
+            'geometry': {
+                'type': 'Point',
+                'coordinates': [latitude, longitude]
+            },
+            'properties': {
+                'date': date,
+                'time': time
+            },
+            'hotspot': hotspot,
+            'cluster': cluster
+        }
+
+    @staticmethod
+    def get_feature_collection(features, hotspot, cluster):
+        return {
+            'type': 'FeatureCollection',
+            'features': features,
+            'hotspot': hotspot,
+            'cluster': cluster
+        }

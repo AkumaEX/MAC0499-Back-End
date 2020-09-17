@@ -7,5 +7,4 @@ services:
       - 80:8000
     environment:
       - DEBUG=0
-      - SECRET_KEY=foo
       - DJANGO_ALLOWED_HOSTS=34.71.127.108

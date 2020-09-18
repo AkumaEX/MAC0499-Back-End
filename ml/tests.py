@@ -90,6 +90,19 @@ class UploadViewTests(TestCase):
         )
         remove_uploaded_file()
 
+    def test_post_success_message(self):
+        client = Client()
+        client.force_login(User.objects.get_or_create(username='test_user')[0])
+        file = SimpleUploadedFile(name='test.xls', content=b'file_content')
+        response = client.post(
+            path=reverse('ml:upload'),
+            data={'name': file.name, 'file': file},
+            format='multipart/form-data',
+            follow=True
+        )
+        self.assertContains(response, 'Arqvuivo enviado com sucesso')
+        remove_uploaded_file()
+
     def test_form(self):
         client = Client()
         client.force_login(User.objects.get_or_create(username='test_user')[0])

@@ -1,26 +1,26 @@
 {% extends 'base.html' %}
 
-{% block title %}Autenticação{% endblock %}
+{% block title %}
+Autenticação
+{% endblock %}
 
-{% block text %}Entre com seu nome de usuário e senha{% endblock %}
+{% block text %}
+Entre com seu nome de usuário e senha
+{% endblock %}
 
 {% block main %}
-
-<div class="card border-white">
-    <div class="card-body">
-        <form action="{% url 'index:login_user' %}" method="post">
-            {% csrf_token %}
-            <div class="form-group form-row">
-                {% for field in form %}
-                <div class="col">
-                    {{ field.label }}:
-                    {{ field }}
-                </div>
-                {% endfor %}
-            </div>
-            <input type="submit" value="Enviar" class="btn btn-primary shadow rounded">
-        </form>
+<form action="{% url 'index:login_user' %}" method="post">
+    {% csrf_token %}
+    <div class="form-group form-row">
+        {% for field in form %}
+        <div class="col">
+            {{ field.label }}:
+            {{ field }}
+        </div>
+        {% endfor %}
     </div>
-</div>
-
+    <button type="submit" class="btn btn-primary shadow rounded"><i class="material-icons"
+                                                                    style="vertical-align: bottom">login</i> Autenticar
+    </button>
+</form>
 {% endblock %}

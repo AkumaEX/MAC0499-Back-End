@@ -1,29 +1,22 @@
 {% extends 'base.html' %}
 
-{% block title %}Painel de Controle{% endblock %}
+{% block title %}
+Painel de Controle
+{% endblock %}
 
-{% block text %}{% endblock %}
+{% block text %}
+{% endblock %}
 
 {% block main %}
-
 <div class="row">
     <div class="col">
-        <div class="card border-white">
-            <div class="card-body">
-                <h5 class="card-title">Aprendizado de Máquina</h5>
-                <p class="card-text">Adicione, remova ou selecione os arquivos para o treinamento</p>
-                <a href="{% url 'ml:index' %}" class="btn btn-primary shadow rounded">Acessar</a>
-            </div>
-        </div>
+        <h5 class="card-title">Aprendizado de Máquina</h5>
+        <p class="card-text">Adicione, remova ou selecione os arquivos para o treinamento</p>
+        <a href="{% url 'ml:index' %}" class="btn btn-primary shadow rounded">Acessar</a>
     </div>
     <div class="col">
-        <div class="card border-white">
-            <div class="card-body">
-                <h5 class="card-title">Interface de Programação de Aplicação</h5>
-                <a href="{% url 'ml:index' %}" class="btn btn-primary shadow rounded">Acessar</a>
-            </div>
-        </div>
+        <h5 class="card-title">Interface de Programação de Aplicação</h5>
+        <a href="{% url 'ml:index' %}" class="btn btn-primary shadow rounded">Acessar</a>
     </div>
 </div>
-
 {% endblock %}

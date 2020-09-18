@@ -10,13 +10,21 @@ Os arquivos estão disponíveis no <a href="http://www.ssp.sp.gov.br/transparenc
 {% endblock %}
 
 {% block main %}
-
-<div class="container">
-    <form action="{% url 'ml:upload'%}" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <input type="submit" value="Enviar" class="btn btn-primary shadow rounded">
-    </form>
-</div>
-
+<form action="{% url 'ml:upload'%}" method="post" enctype="multipart/form-data" id="upload-form">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button id="form-button" type="submit" class="btn btn-primary shadow rounded"><i class="material-icons"
+                                                                                     style="vertical-align: bottom">cloud_upload</i>
+        Enviar
+    </button>
+</form>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#form-button").click(function () {
+            $(this).prop("disabled", true);
+            $(this).html(`<i class="spinner-border spinner-border-sm"></i> Enviando ...`);
+            $("#upload-form").submit();
+        });
+    });
+</script>
 {% endblock %}

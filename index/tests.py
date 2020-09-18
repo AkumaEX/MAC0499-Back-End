@@ -63,6 +63,17 @@ class LoginViewTests(TestCase):
             target_status_code=200
         )
 
+    def test_post_success_message(self):
+        client = Client()
+        User.objects.create_user(username='test_user', password='secret')
+        response = client.post(
+            path=reverse('index:login_user'),
+            data={'username': 'test_user', 'password': 'secret'},
+            follow=True
+        )
+        self.assertContains(response, 'Entrou com sucesso')
+        self.assertEqual(response.status_code, 200)
+
     def test_post_invalid_username(self):
         client = Client()
         User.objects.create_user(username='test_user', password='secret')
@@ -107,10 +118,17 @@ class LogoutViewTests(TestCase):
     def test_redirection(self):
         client = Client()
         client.force_login(User.objects.get_or_create(username='test_user')[0])
-        response = client.get(reverse('index:logout_user'))
+        response = client.get(reverse('index:logout_user'), follow=True)
         self.assertRedirects(
             response=response,
             expected_url=reverse('index:login_user'),
             status_code=302,
             target_status_code=200
         )
+
+    def test_get_success_message(self):
+        client = Client()
+        client.force_login(User.objects.get_or_create(username='test_user')[0])
+        response = client.get(reverse('index:logout_user'), follow=True)
+        self.assertContains(response, 'Saiu com sucesso')
+        self.assertEqual(response.status_code, 200)

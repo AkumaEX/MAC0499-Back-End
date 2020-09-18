@@ -5,30 +5,32 @@ Aprendizado de Máquina
 {% endblock %}
 
 {% block text %}
-Adicione, remova ou selecione os arquivos para o treinamento
+Adicione, remova ou selecione os arquivos para configurar o treinamento
 {% endblock %}
 
 {% block main %}
-<div class="container">
-    <a href="{% url 'ml:upload' %}" class="btn btn-primary shadow rounded">Adicionar arquivo</a>
-    <p></p>
+<a href="{% url 'ml:upload' %}" class="btn btn-primary shadow rounded"><i class="material-icons"
+                                                                          style="vertical-align: bottom">cloud_upload</i>
+    Adicionar arquivo</a>
+<p></p>
 
-    {% if form.pk|length %}
-    <form method="post">
-        {% csrf_token %}
+{% if form.pk|length %}
+<form method="post">
+    {% csrf_token %}
 
-        <label>Selecione:</label>
-        {% for choice in form.pk %}
-        <div class="form-group form-check">
-            {{ choice }}
-        </div>
-        {% endfor %}
+    <label>Selecione:</label>
+    {% for choice in form.pk %}
+    <div class="form-group form-check">
+        {{ choice }}
+    </div>
+    {% endfor %}
 
-        <input formaction="{% url 'ml:configure' %}" type="submit" value="Treinar"
-               class="btn btn-primary shadow rounded">
-        <input formaction="{% url 'ml:delete' %}" type="submit" value="Remover"
-               class="btn btn-danger shadow rounded">
-    </form>
-    {% endif %}
-</div>
+    <button formaction="{% url 'ml:configure' %}" type="submit" class="btn btn-primary shadow rounded"><i
+            class="material-icons" style="vertical-align: bottom">settings</i> Configurar
+    </button>
+    <button formaction="{% url 'ml:delete' %}" type="submit" class="btn btn-danger shadow rounded"><i
+            class="material-icons" style="vertical-align: bottom">delete</i> Remover
+    </button>
+</form>
+{% endif %}
 {% endblock %}

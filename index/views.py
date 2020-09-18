@@ -19,6 +19,7 @@ def login_user(request):
             user = authenticate(request, username=username, password=password)
             if user is not None:
                 login(request, user)
+                messages.success(request, 'Entrou com sucesso', extra_tags='success')
                 return redirect(reverse('index:index'))
             else:
                 messages.error(request, 'Credenciais inválidas. Verifique e tente novamente', extra_tags='danger')
@@ -30,4 +31,5 @@ def login_user(request):
 
 def logout_user(request):
     logout(request)
+    messages.success(request, 'Saiu com sucesso', extra_tags='success')
     return redirect(reverse('index:login_user'))

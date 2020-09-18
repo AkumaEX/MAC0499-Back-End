@@ -100,7 +100,7 @@ class UploadViewTests(TestCase):
             format='multipart/form-data',
             follow=True
         )
-        self.assertContains(response, 'Arqvuivo enviado com sucesso')
+        self.assertContains(response, 'Arquivo enviado com sucesso')
         remove_uploaded_file()
 
     def test_form(self):

@@ -27,7 +27,7 @@ def upload(request):
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Arqvuivo enviado com sucesso', extra_tags='success')
+            messages.success(request, 'Arquivo enviado com sucesso', extra_tags='success')
             return HttpResponseRedirect(reverse('ml:index'))
     else:
         form = UploadFileForm()

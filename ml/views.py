@@ -11,6 +11,7 @@ from .forms import SelectFileForm
 from .forms import NumberClusterForm
 from .models import UploadFile
 from .models import ClusterData
+from .models import BoundaryData
 from ml.hotspot_predictor import HotspotPredictor
 from joblib import dump, load
 
@@ -67,7 +68,7 @@ def train(request):
         n_clusters_form = NumberClusterForm(request.POST)
         if filepaths and n_clusters_form.is_valid():
             n_clusters = n_clusters_form.cleaned_data['n_clusters']
-            predictor = HotspotPredictor(filepaths, n_clusters)
+            predictor = HotspotPredictor(filepaths=filepaths, n_clusters=n_clusters)
             kmeans = predictor.get_kmeans()
             dump(kmeans, settings.MEDIA_ROOT + '/kmeans.joblib')
             clusters_data = predictor.get_results()
@@ -91,3 +92,8 @@ def api(request):
         else:
             messages.warning(request, 'Objeto não encontrado no Banco de Dados', extra_tags='warning')
     return HttpResponseRedirect(reverse('ml:index'))
+
+
+def boundary(request):
+    geojson = BoundaryData.objects.all().first()
+    return JsonResponse(geojson.data)

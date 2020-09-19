@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from scipy.spatial import Voronoi
 from sklearn.cluster import MiniBatchKMeans
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import ColumnTransformer
@@ -15,7 +16,8 @@ class HotspotPredictor(object):
         self._kmeans = MiniBatchKMeans(n_clusters=n_clusters, init_size=n_clusters, random_state=42)
         self._df = self._get_dataframe()
         self._hotspot = self._predict_hotspot()
-        self._results = list()
+        self._boundaries = self._create_boundaries()
+        self._results = self._get_results()
 
     def get_kmeans(self):
         return self._kmeans
@@ -26,13 +28,10 @@ class HotspotPredictor(object):
     def get_hotspot(self):
         return self._hotspot
 
+    def get_boundaries(self):
+        return self._boundaries
+
     def get_results(self):
-        for cluster in range(self._n_clusters):
-            df = self._df[self._df['GRUPO'] == cluster]
-            features = [
-                self._get_feature(row['LATITUDE'], row['LONGITUDE'], row['DATAOCORRENCIA'], row['HORAOCORRENCIA'],
-                                  bool(self._hotspot[cluster]), cluster) for idx, row in df.iterrows()]
-            self._results.append(self._get_feature_collection(features, bool(self._hotspot[cluster]), cluster))
         return self._results
 
     @staticmethod
@@ -89,8 +88,17 @@ class HotspotPredictor(object):
             hotspot[i] = y_pred[i]
         return hotspot
 
-    @staticmethod
-    def _get_feature(latitude, longitude, date, time, hotspot, cluster):
+    def _get_results(self):
+        results = []
+        for cluster in range(self._n_clusters):
+            df = self._df[self._df['GRUPO'] == cluster]
+            features = [self._get_point(row['LATITUDE'], row['LONGITUDE'], row['DATAOCORRENCIA'], row['HORAOCORRENCIA'],
+                                        cluster) for idx, row in df.iterrows()]
+            features.append(self._get_boundary(cluster))
+            results.append(self._get_feature_collection(features, cluster))
+        return results
+
+    def _get_point(self, latitude, longitude, date, time, cluster):
         return {
             'type': 'Feature',
             'geometry': {
@@ -101,15 +109,87 @@ class HotspotPredictor(object):
                 'date': date,
                 'time': time
             },
-            'hotspot': hotspot,
+            'hotspot': bool(self._hotspot[cluster]),
+            'cluster': cluster
+        }
+
+    def _get_boundary(self, cluster):
+        return {
+            'type': 'Feature',
+            'geometry': {
+                'type': 'LineString',
+                'coordinates': self._boundaries.get(cluster, [])
+            },
+            'hotspot': bool(self._hotspot[cluster]),
+            'cluster': cluster
+        }
+
+    def _get_feature_collection(self, features, cluster):
+        return {
+            'type': 'FeatureCollection',
+            'features': features,
+            'hotspot': bool(self._hotspot[cluster]),
             'cluster': cluster
         }
 
     @staticmethod
-    def _get_feature_collection(features, hotspot, cluster):
-        return {
-            'type': 'FeatureCollection',
-            'features': features,
-            'hotspot': hotspot,
-            'cluster': cluster
-        }
+    def voronoi_finite_polygons_2d(vor, radius=None):
+        if vor.points.shape[1] != 2:
+            raise ValueError("Requires 2D input")
+
+        new_regions = []
+        new_vertices = vor.vertices.tolist()
+
+        center = vor.points.mean(axis=0)
+        if radius is None:
+            radius = vor.points.ptp().max() * 2
+
+        all_ridges = {}
+        for (p1, p2), (v1, v2) in zip(vor.ridge_points, vor.ridge_vertices):
+            all_ridges.setdefault(p1, []).append((p2, v1, v2))
+            all_ridges.setdefault(p2, []).append((p1, v1, v2))
+
+        for p1, region in enumerate(vor.point_region):
+            vertices = vor.regions[region]
+
+            if all([v >= 0 for v in vertices]):
+                new_regions.append(vertices)
+                continue
+
+            ridges = all_ridges.get(p1, [])
+            new_region = [v for v in vertices if v >= 0]
+
+            for p2, v1, v2 in ridges:
+                if v2 < 0:
+                    v1, v2 = v2, v1
+                if v1 >= 0:
+                    continue
+
+                t = vor.points[p2] - vor.points[p1]
+                t /= np.linalg.norm(t)
+                n = np.array([-t[1], t[0]])
+
+                midpoint = vor.points[[p1, p2]].mean(axis=0)
+                direction = np.sign(np.dot(midpoint - center, n)) * n
+                far_point = vor.vertices[v2] + direction * radius
+
+                new_region.append(len(new_vertices))
+                new_vertices.append(far_point.tolist())
+
+            vs = np.asarray([new_vertices[v] for v in new_region])
+            c = vs.mean(axis=0)
+            angles = np.arctan2(vs[:, 1] - c[1], vs[:, 0] - c[0])
+            new_region = np.array(new_region)[np.argsort(angles)]
+            new_regions.append(new_region.tolist())
+
+        return new_regions, np.asarray(new_vertices)
+
+    def _create_boundaries(self):
+        boundaries = {}
+        points = self._kmeans.cluster_centers_
+        clusters = self._kmeans.predict(points)
+        vor = Voronoi(points)
+        regions, vertices = self.voronoi_finite_polygons_2d(vor)
+        for cluster, region in zip(clusters, regions):
+            boundaries[cluster] = vertices[region].tolist()
+        return boundaries

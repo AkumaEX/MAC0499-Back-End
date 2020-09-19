@@ -9,5 +9,6 @@ urlpatterns = [
     path('configure', views.configure, name='configure'),
     path('delete', views.delete, name='delete'),
     path('train', views.train, name='train'),
-    path('api', views.api, name='api')
+    path('api', views.api, name='api'),
+    path('boundary', views.boundary, name='boundary')
 ]

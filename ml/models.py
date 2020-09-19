@@ -10,3 +10,7 @@ class UploadFile(models.Model):
 
 class ClusterData(models.Model):
     data = models.JSONField()
+
+
+class BoundaryData(models.Model):
+    data = models.JSONField()

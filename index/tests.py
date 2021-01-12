@@ -5,17 +5,6 @@ from .forms import LoginForm
 
 
 class IndexViewTests(TestCase):
-
-    def test_login_required(self):
-        client = Client()
-        response = client.get(reverse('index:index'), follow=True)
-        self.assertRedirects(
-            response=response,
-            expected_url='/login?next=/',
-            status_code=302,
-            target_status_code=200
-        )
-
     def test_template(self):
         client = Client()
         client.force_login(User.objects.get_or_create(username='test_user')[0])

@@ -14,8 +14,8 @@ class HotspotPredictor(object):
 
         self._filepaths = filepaths
         self._n_clusters = n_clusters
-        self._kmeans = MiniBatchKMeans(n_clusters=n_clusters, init_size=n_clusters, max_iter=10000)
         self._df = self._get_dataframe()
+        self._kmeans = self._get_kmeans()
         self._hotspot = self._predict_hotspot()
         self._boundaries = self._create_boundaries()
         self._results = self._get_results()
@@ -38,9 +38,19 @@ class HotspotPredictor(object):
     def get_results(self):
         return self._results
 
+    def _get_kmeans(self):
+        if self._n_clusters == 0:
+            init_clusters = self._df[['BAIRRO', 'CIDADE', 'LATITUDE', 'LONGITUDE']].groupby(
+                ['CIDADE', 'BAIRRO']).mean().dropna().to_numpy()
+            self._n_clusters, _ = init_clusters.shape
+            return MiniBatchKMeans(n_clusters=self._n_clusters, init_size=self._n_clusters, max_iter=10000,
+                                   init=init_clusters)
+        else:
+            return MiniBatchKMeans(n_clusters=self._n_clusters, init_size=self._n_clusters, max_iter=10000)
+
     @staticmethod
     def _load_dataframe(filepath, month):
-        cols = ['DATAOCORRENCIA', 'HORAOCORRENCIA', 'LATITUDE', 'LONGITUDE']
+        cols = ['DATAOCORRENCIA', 'HORAOCORRENCIA', 'BAIRRO', 'CIDADE', 'LATITUDE', 'LONGITUDE']
         df = pd.read_csv(
             filepath_or_buffer=filepath,
             encoding='utf-16 le',
@@ -62,11 +72,10 @@ class HotspotPredictor(object):
 
     def _get_dataframe(self):
         df = pd.concat([self._load_dataframe(filepath, idx + 1) for idx, filepath in enumerate(self._filepaths)])
-        df = self._clear_dataframe(df)
-        df['GRUPO'] = self._kmeans.fit_predict(df[['LATITUDE', 'LONGITUDE']])
-        return df
+        return self._clear_dataframe(df)
 
     def _process_dataframe(self, df):
+        df['GRUPO'] = self._kmeans.fit_predict(df[['LATITUDE', 'LONGITUDE']])
         df = df.groupby(['GRUPO', 'MES']).size().reset_index()
         df.columns = ['GRUPO', 'MES', 'COUNT']
 

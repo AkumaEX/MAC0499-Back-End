@@ -167,7 +167,7 @@ class TrainViewTests(TestCase):
         )
         self.assertRedirects(
             response=response,
-            expected_url=reverse('ml:index'),
+            expected_url=reverse('index:index'),
             status_code=302,
             target_status_code=200
         )

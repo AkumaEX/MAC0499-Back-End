@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.contrib import messages
 from django.http import HttpResponseRedirect
+from django.http import HttpResponseNotFound
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
@@ -11,9 +12,9 @@ from .forms import SelectFileForm
 from .forms import NumberClusterForm
 from .models import UploadFile
 from .models import ClusterData
-from .models import BoundaryData
 from ml.hotspot_predictor import HotspotPredictor
-from joblib import dump, load
+from ml.hotspot_viewer import HotspotViewer
+from joblib import load
 
 
 @login_required
@@ -69,31 +70,43 @@ def train(request):
         if filepaths and n_clusters_form.is_valid():
             n_clusters = n_clusters_form.cleaned_data['n_clusters']
             predictor = HotspotPredictor(filepaths=filepaths, n_clusters=n_clusters)
-            kmeans = predictor.get_kmeans()
-            dump(kmeans, settings.MEDIA_ROOT + '/kmeans.joblib')
+            predictor.save_kmeans_to(settings.MEDIA_ROOT + '/kmeans.joblib')
             clusters_data = predictor.get_results()
-            objs = [ClusterData(data=data) for data in clusters_data]
-            ClusterData.objects.all().delete()
-            ClusterData.objects.bulk_create(objs)
+            save_results(clusters_data)
+            HotspotViewer(clusters_data=clusters_data).save_map_to(settings.MEDIA_ROOT + '/folium.html')
             messages.success(request, 'Treinamento concluído com sucesso', extra_tags='success')
             return HttpResponseRedirect(reverse('ml:index'))
-    return HttpResponseRedirect(reverse('ml:index'))
+    return HttpResponseRedirect(reverse('index:index'))
+
+
+def save_results(clusters_data):
+    objs = [ClusterData(data=data) for data in clusters_data]
+    ClusterData.objects.all().delete()
+    ClusterData.objects.bulk_create(objs)
 
 
 def api(request):
     latitude = request.GET.get('latitude', None)
     longitude = request.GET.get('longitude', None)
     if latitude and longitude:
-        kmeans = load(settings.MEDIA_ROOT + '/kmeans.joblib')
-        cluster = kmeans.predict([[latitude, longitude]])
-        obj = ClusterData.objects.filter(data__cluster=int(cluster[0]))
-        if obj:
-            return JsonResponse(obj[0].data)
-        else:
-            messages.warning(request, 'Objeto não encontrado no Banco de Dados', extra_tags='warning')
-    return HttpResponseRedirect(reverse('ml:index'))
+        try:
+            kmeans = load(settings.MEDIA_ROOT + '/kmeans.joblib')
+            cluster = kmeans.predict([[latitude, longitude]])
+            obj = ClusterData.objects.filter(data__cluster=int(cluster[0]))
+            if obj:
+                return JsonResponse(obj[0].data)
+            else:
+                messages.warning(request, 'Objeto não encontrado no Banco de Dados', extra_tags='warning')
+        except FileNotFoundError:
+            return HttpResponseNotFound('Arquivo não encontrado')
+    return HttpResponseRedirect(reverse('index:index'))
 
 
-def boundary(request):
-    geojson = BoundaryData.objects.all().first()
-    return JsonResponse(geojson.data)
+def view(request):
+    try:
+        with open(settings.MEDIA_ROOT + '/folium.html', 'r') as f:
+            folium_map = f.read()
+            return render(request, 'ml/view.html', {'map': folium_map})
+    except FileNotFoundError:
+        messages.warning(request, 'Arquivo não encontrado', extra_tags='warning')
+        return HttpResponseRedirect(reverse('index:index'))

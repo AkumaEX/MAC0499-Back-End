@@ -5,7 +5,6 @@ from django.contrib import messages
 from .forms import LoginForm
 
 
-@login_required
 def index(request):
     return render(request, 'index/index.html')
 

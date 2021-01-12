@@ -5,6 +5,7 @@ from sklearn.cluster import MiniBatchKMeans
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.linear_model import LinearRegression
+from joblib import dump
 
 
 class HotspotPredictor(object):
@@ -13,7 +14,7 @@ class HotspotPredictor(object):
 
         self._filepaths = filepaths
         self._n_clusters = n_clusters
-        self._kmeans = MiniBatchKMeans(n_clusters=n_clusters, init_size=n_clusters, random_state=42)
+        self._kmeans = MiniBatchKMeans(n_clusters=n_clusters, init_size=n_clusters, max_iter=10000)
         self._df = self._get_dataframe()
         self._hotspot = self._predict_hotspot()
         self._boundaries = self._create_boundaries()
@@ -30,6 +31,9 @@ class HotspotPredictor(object):
 
     def get_boundaries(self):
         return self._boundaries
+
+    def save_kmeans_to(self, address):
+        dump(self._kmeans, address)
 
     def get_results(self):
         return self._results

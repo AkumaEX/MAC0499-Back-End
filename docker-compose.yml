@@ -16,3 +16,4 @@ services:
       - db
     environment:
       - SQL_HOST=db
+      - IPSTACK=b9adaee387adf5328c68006ed38f320a

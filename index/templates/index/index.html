@@ -10,13 +10,31 @@ Painel de Controle
 {% block main %}
 <div class="row">
     <div class="col">
-        <h5 class="card-title">Aprendizado de Máquina</h5>
-        <p class="card-text">Adicione, remova ou selecione os arquivos para o treinamento</p>
+        <h5 class="card-title">Atualização dos dados</h5>
+        <h6 class="card-subtitle mb-2 text-muted">Treinamento do modelo</h6>
+        <p class="card-text">Somente usuários autorizados</p>
         <a href="{% url 'ml:index' %}" class="btn btn-primary shadow rounded">Acessar</a>
     </div>
     <div class="col">
-        <h5 class="card-title">Interface de Programação de Aplicação</h5>
-        <a href="{% url 'ml:index' %}" class="btn btn-primary shadow rounded">Acessar</a>
+        <h5 class="card-title">Visualização dos dados</h5>
+        <h6 class="card-subtitle mb-2 text-muted">Resultado do modelo</h6>
+        <p class="card-text">Todos os usuários</p>
+        <a href="{% url 'ml:view' %}" class="btn btn-primary shadow rounded" id="view-button">Acessar</a>
+    </div>
+    <div class="col">
+        <h5 class="card-title">Acesso à infraestrutura</h5>
+        <h6 class="card-subtitle mb-2 text-muted">Manutenção do sistema</h6>
+        <p class="card-text">Somente administrador</p>
+        <a href="https://console.cloud.google.com" class="btn btn-primary shadow rounded">Acessar</a>
     </div>
 </div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#view-button").click(function () {
+            $(this).prop("disabled", true);
+            $(this).html(`<i class="spinner-border spinner-border-sm"></i> Carregando ...`);
+        });
+    });
+</script>
 {% endblock %}

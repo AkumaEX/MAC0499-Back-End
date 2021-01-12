@@ -10,5 +10,5 @@ urlpatterns = [
     path('delete', views.delete, name='delete'),
     path('train', views.train, name='train'),
     path('api', views.api, name='api'),
-    path('boundary', views.boundary, name='boundary')
+    path('view', views.view, name='view'),
 ]

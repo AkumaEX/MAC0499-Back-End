@@ -9,3 +9,4 @@ services:
       - DEBUG=0
       - DJANGO_ALLOWED_HOSTS=eroubo.akumaex.com
     tty: true
+
